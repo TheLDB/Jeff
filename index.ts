@@ -62,7 +62,7 @@ const chat = model.startChat({
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
     if (message.channel.type != ChannelType.GuildText) return;
-    if (message.channel.id == envguard.DISCORD_BOT_CHANNEL_ID) {
+    if (message.channel.name == envguard.BOT_NAME.toLowerCase()) {
         if (message.content.startsWith("#")) return;
         message.channel.sendTyping();
         const result = await chat.sendMessage(`${message.author.displayName}: ${message.content}`);
