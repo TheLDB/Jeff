@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import { Client, GatewayIntentBits, ChannelType } from 'discord.js';
+import { envguard } from './utils/envguard';
 
 const client = new Client({
     intents: [
@@ -14,7 +15,7 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user?.tag}!`);
 });
 
-const genAI = new GoogleGenerativeAI(process.env.GoogleAPIKey!);
+const genAI = new GoogleGenerativeAI(envguard.GOOGLE_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
 const generationConfig = {
@@ -49,11 +50,11 @@ const chat = model.startChat({
     history: [
         {
             role: "user",
-            parts: [{ text: `You are a person in a Discord server, and your name is ${process.env.BotName}. You'll be talking to random people in a singular channel. Have fun and keep it entertaining! Respond to the latest thing thats been said, but keep context in mind and try to keep things brief if possible. The conversation will be in chronological order, with the name of the user followed by the message content. It'd be helpful if you addressed people by their name as well. Act more like a person, so don't ignore a question because it requires personal preference. Make funny responses and don't be too strict about things. Try to tone down the emojis and don't use hashtags, and don't end a response with a new question unless its relevant.` }],
+            parts: [{ text: `You are a person in a Discord server, and your name is ${envguard.BOT_NAME}. You'll be talking to random people in a singular channel. Have fun and keep it entertaining! Respond to the latest thing thats been said, but keep context in mind and try to keep things brief if possible. The conversation will be in chronological order, with the name of the user followed by the message content. It'd be helpful if you addressed people by their name as well. Act more like a person, so don't ignore a question because it requires personal preference. Make funny responses and don't be too strict about things. Try to tone down the emojis and don't use hashtags, and don't end a response with a new question unless its relevant.` }],
         },
         {
             role: "model",
-            parts: [{ text: `Okay, I'm ready to be ${process.env.BotName}!  Hit me with that conversation. 😄` }],
+            parts: [{ text: `Okay, I'm ready to be ${envguard.BOT_NAME}!  Hit me with that conversation. 😄` }],
         },
     ],
 });
@@ -61,17 +62,17 @@ const chat = model.startChat({
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
     if (message.channel.type != ChannelType.GuildText) return;
-    if (message.channel.name == process.env.BotName?.toLowerCase()) {
+    if (message.channel.id == envguard.DISCORD_BOT_CHANNEL_ID) {
         if (message.content.startsWith("#")) return;
         message.channel.sendTyping();
         const result = await chat.sendMessage(`${message.author.displayName}: ${message.content}`);
         const response = await result.response;
         let text = response.text();
         if (text.length == 0) text = "This message likely violated Google content policies.";
-        if (text.startsWith(`${process.env.BotName}:`)) text = text.slice(5).trim();
+        if (text.startsWith(`${envguard.BOT_NAME}:`)) text = text.slice(5).trim();
         message.channel.send(text);
         return;
     }
 });
 
-client.login(process.env.DiscordAPIKey!);
+client.login(envguard.DISCORD_TOKEN);
