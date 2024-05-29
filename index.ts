@@ -16,7 +16,7 @@ client.on('ready', () => {
 });
 
 const genAI = new GoogleGenerativeAI(envguard.GOOGLE_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro-001" });
 
 const generationConfig = {
     temperature: 0.7,
